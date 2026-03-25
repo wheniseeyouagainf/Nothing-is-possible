@@ -14,10 +14,8 @@
             height: 100vh; margin: 0; overflow: hidden; position: relative;
             font-family: "PingFang SC", sans-serif;
         }
-
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        /* 增强版流星 */
+        
         .star-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
         .meteor { position: absolute; width: 3px; height: 1px; background: #fff; border-radius: 50%; opacity: 0; animation: meteor-ani linear infinite; }
         @keyframes meteor-ani {
@@ -27,7 +25,7 @@
             100% { opacity: 0; }
         }
 
-        .container { position: relative; z-index: 10; text-align: center; width: 90%; max-width: 650px; transition: all 2s cubic-bezier(0.6, 0, 0.4, 1); }
+        .container { position: relative; z-index: 10; text-align: center; width: 90%; max-width: 650px; transition: all 2.2s cubic-bezier(0.6, 0, 0.4, 1); }
         h1 { font-weight: 300; letter-spacing: 12px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
         p.subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.3); margin-bottom: 40px; letter-spacing: 4px; }
 
@@ -35,28 +33,21 @@
             width: 100%; height: 280px; background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px;
             color: #fff; font-size: 1.1rem; line-height: 1.8; outline: none; resize: none; box-sizing: border-box;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4); transition: border 0.3s;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
-        textarea:focus { border-color: rgba(255,255,255,0.3); }
 
         button {
             margin-top: 40px; padding: 14px 75px; background: transparent; 
             border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 15px; 
             border-radius: 35px; cursor: pointer; transition: 0.4s; letter-spacing: 6px;
         }
-        button:hover { background: rgba(255,255,255,0.1); border-color: #fff; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        button:hover { background: rgba(255,255,255,0.1); border-color: #fff; transform: translateY(-3px); }
 
-        /* 3D 沉入效果 */
-        .shred-effect { transform: scale(0.01) translateY(1200px) rotateX(90deg) rotateZ(20deg); opacity: 0; filter: blur(30px); }
-
-        #peace-msg {
-            position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
-            opacity: 0; transition: 3s; text-align: center; font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.85); letter-spacing: 6px; font-weight: 300;
-        }
+        .shred-effect { transform: scale(0.01) translateY(1200px) rotateX(90deg) rotateZ(15deg); opacity: 0; filter: blur(30px); }
+        #peace-msg { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); opacity: 0; transition: 3s; text-align: center; font-size: 1.25rem; color: rgba(255, 255, 255, 0.85); letter-spacing: 6px; }
     </style>
 </head>
-<body onclick="initAudio()">
+<body onclick="initAmbientAudio()">
 
     <div class="star-container" id="starContainer"></div>
 
@@ -71,7 +62,7 @@
     <div id="peace-msg"></div>
 
     <script>
-        // 1. 动态生成流星
+        // 1. 生成流星
         const sc = document.getElementById('starContainer');
         for (let i = 0; i < 25; i++) {
             let m = document.createElement('div');
@@ -83,31 +74,65 @@
             sc.appendChild(m);
         }
 
-        // 2. 音频控制 - 换用更真实的自然采样链接
-        // 雨声：由稳重的中低频雨滴组成，非风声
-        const rain = new Audio("https://actions.google.com/sounds/v1/water/rain_on_roof.ogg");
-        rain.loop = true;
-        // 交付声：清脆的木质敲击+水滴混响（替代之前的电子音）
-        const deliverSound = new Audio("https://actions.google.com/sounds/v1/water/water_splash.ogg");
-
-        let audioInitialized = false;
-        function initAudio() {
-            if (!audioInitialized) {
-                rain.play().then(() => {
-                    rain.volume = 0;
-                    // 渐入效果，避免突兀
-                    let vol = 0;
-                    const fadeIn = setInterval(() => {
-                        if (vol < 0.4) {
-                            vol += 0.05;
-                            rain.volume = vol;
-                        } else {
-                            clearInterval(fadeIn);
-                        }
-                    }, 200);
-                }).catch(e => console.log("等待手势"));
-                audioInitialized = true;
+        // 2. 高保真粉红噪声（模拟真实雨声）
+        let audioCtx, rainGain;
+        function initAmbientAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // 生成粉红噪声（雨声的核心）
+            const bufferSize = 4 * audioCtx.sampleRate;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            let b0, b1, b2, b3, b4, b5, b6;
+            b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                data[i] *= 0.11; // 调整基础增益
+                b6 = white * 0.115926;
             }
+
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.loop = true;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 1000; // 模拟窗外雨声的闷响
+
+            rainGain = audioCtx.createGain();
+            rainGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            rainGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 2); // 2秒渐入
+
+            source.connect(filter);
+            filter.connect(rainGain);
+            rainGain.connect(audioCtx.destination);
+            source.start();
+        }
+
+        // 3. 定制“沉水”交付音效
+        function playDeepWaterSound() {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = 'sine';
+            // 模拟物体入水：频率从高到极低
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1.5);
+            
+            g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+            
+            osc.connect(g);
+            g.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
         }
 
         function shredContent(e) {
@@ -115,10 +140,7 @@
             const area = document.getElementById('inputArea');
             if (!area.value.trim()) return;
 
-            // 播放清脆的交付声
-            deliverSound.currentTime = 0;
-            deliverSound.volume = 0.6;
-            deliverSound.play();
+            playDeepWaterSound(); // 触发沉水声
 
             const content = document.getElementById('main-content');
             const msgBox = document.getElementById('peace-msg');
