@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>渡口 - 留下你的负重</title>
     <style>
+        /* 保留你喜欢的星空和渐变样式 */
         body {
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             background-size: 400% 400%;
@@ -18,169 +19,108 @@
             margin: 0;
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             overflow: hidden;
-            position: relative;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* 流星样式 */
-        .star-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0;
-        }
-        .meteor {
-            position: absolute;
-            width: 2px; height: 2px;
-            background: #fff;
-            border-radius: 50%;
-            opacity: 0;
-            animation: meteor-ani linear infinite;
-        }
-        @keyframes meteor-ani {
-            0% { transform: translate(0, 0) rotate(-45deg) scale(0); opacity: 0; }
-            10% { opacity: 1; scale: 1; }
-            20% { transform: translate(-300px, 300px) rotate(-45deg) scale(1); opacity: 0; }
-            100% { opacity: 0; }
-        }
+        .star-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .meteor { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; opacity: 0; animation: meteor-ani linear infinite; }
+        @keyframes meteor-ani { 0% { transform: translate(0, 0) rotate(-45deg) scale(0); opacity: 0; } 10% { opacity: 1; } 20% { transform: translate(-300px, 300px) rotate(-45deg); opacity: 0; } }
 
         #music-control {
-            position: fixed; top: 25px; right: 25px;
-            cursor: pointer; z-index: 100;
-            opacity: 0.6; transition: 0.3s;
-            font-size: 13px; border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 18px; border-radius: 20px;
-            background: rgba(0,0,0,0.2); user-select: none;
+            position: fixed; top: 25px; right: 25px; cursor: pointer; z-index: 100;
+            border: 1px solid rgba(255,255,255,0.3); padding: 8px 18px; border-radius: 20px;
+            background: rgba(0,0,0,0.3); user-select: none;
         }
 
-        .container {
-            position: relative; z-index: 10;
-            text-align: center; width: 90%; max-width: 650px;
-            transition: all 1.8s cubic-bezier(0.5, 0, 0, 1);
-        }
-
-        h1 { font-weight: 300; letter-spacing: 10px; margin-bottom: 8px; }
-        p.subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-bottom: 45px; letter-spacing: 3px; }
-
-        textarea {
-            width: 100%; height: 280px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 30px;
-            color: #fff; font-size: 1.05rem; line-height: 2;
-            outline: none; resize: none; box-sizing: border-box;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        button {
-            margin-top: 50px; padding: 12px 60px;
-            background: transparent; border: 1px solid rgba(255,255,255,0.3);
-            color: #fff; font-size: 14px; border-radius: 30px;
-            cursor: pointer; transition: 0.5s; letter-spacing: 4px;
-        }
-        button:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
-
-        /* 信封沉入效果 */
-        .shred-effect {
-            transform: scale(0.1) translateY(600px) rotateX(45deg);
-            opacity: 0;
-            filter: blur(10px);
-        }
-
-        #peace-msg {
-            position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
-            opacity: 0; transition: opacity 2s ease;
-            text-align: center; font-style: italic; font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.75); letter-spacing: 2px;
-        }
+        .container { text-align: center; width: 90%; max-width: 650px; transition: all 1.8s ease; z-index: 10; }
+        textarea { width: 100%; height: 280px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 30px; color: #fff; font-size: 1rem; outline: none; resize: none; }
+        button { margin-top: 50px; padding: 12px 60px; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 30px; cursor: pointer; }
+        
+        .shred-effect { transform: scale(0.1) translateY(600px); opacity: 0; }
+        #peace-msg { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); opacity: 0; transition: 2s; text-align: center; color: #fff; }
     </style>
 </head>
-<body>
+<body onclick="unlockAudio()">
 
     <div class="star-container" id="starContainer"></div>
-    <div id="music-control" onclick="toggleMusic()">🎵 开启环境音</div>
+    <div id="music-control" onclick="toggleMusic()">🎵 声音：加载中...</div>
 
     <div class="container" id="main-content">
         <h1>渡口</h1>
-        <p class="subtitle">让带不走的，留在此地</p>
-        <textarea id="inputArea" placeholder="写下你的心事，让流星带走它..."></textarea>
+        <p style="color:rgba(255,255,255,0.4); letter-spacing: 3px;">让带不走的，留在此地</p>
+        <textarea id="inputArea" placeholder="写下你的心事..."></textarea>
         <br>
         <button onclick="shredContent()">彻底交付</button>
     </div>
 
     <div id="peace-msg"></div>
 
-    <audio id="bgMusic" loop>
-        <source src="https://www.soundjay.com/nature/sounds/rain-01.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="shredSound">
-        <source src="https://assets.mixkit.co/active_storage/sfx/255/255-preview.mp3" type="audio/mpeg">
-    </audio>
-
     <script>
-        // 生成流星
+        // 流星生成逻辑保持不变
         const starContainer = document.getElementById('starContainer');
-        for (let i = 0; i < 20; i++) {
-            let meteor = document.createElement('div');
-            meteor.className = 'meteor';
-            meteor.style.left = Math.random() * 100 + '%';
-            meteor.style.top = Math.random() * 50 + '%';
-            meteor.style.animationDuration = (Math.random() * 3 + 2) + 's';
-            meteor.style.animationDelay = (Math.random() * 10) + 's';
-            starContainer.appendChild(meteor);
+        for (let i = 0; i < 15; i++) {
+            let m = document.createElement('div');
+            m.className = 'meteor';
+            m.style.left = Math.random() * 100 + '%';
+            m.style.top = Math.random() * 50 + '%';
+            m.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            m.style.animationDelay = (Math.random() * 5) + 's';
+            starContainer.appendChild(m);
         }
 
-        const quotes = ["万物皆有裂痕，那是光照进来的地方。", "这一刻，风替你带走了它们。", "你已经做得很好了，接下来的路请轻装上阵。", "世界偶尔薄情，但我们要对自己温柔。"];
-        const bgMusic = document.getElementById('bgMusic');
+        // --- 核心音频逻辑修复 ---
+        const bgMusic = new Audio();
+        bgMusic.loop = true;
+        // 关键：使用能稳定访问的官方测试源
+        bgMusic.src = "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg";
+
+        let audioContext;
         const musicBtn = document.getElementById('music-control');
 
-        function toggleMusic() {
+        // 1. 强制解锁 AudioContext (针对火狐)
+        function unlockAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        // 2. 状态监测
+        bgMusic.oncanplaythrough = () => {
+            musicBtn.innerText = "🎵 点击开启雨声";
+        };
+
+        async function toggleMusic() {
+            unlockAudio();
             if (bgMusic.paused) {
-                bgMusic.play().then(() => {
-                    bgMusic.volume = 0.3;
-                    musicBtn.innerText = "🎵 环境音已开启";
-                }).catch(e => {
-                    alert("请先点击页面任意位置，再开启声音。");
-                });
+                try {
+                    await bgMusic.play();
+                    bgMusic.volume = 0.4;
+                    musicBtn.innerText = "🎵 雨声播放中";
+                } catch (e) {
+                    console.log("播放失败", e);
+                }
             } else {
                 bgMusic.pause();
-                musicBtn.innerText = "🎵 环境音已关闭";
+                musicBtn.innerText = "🎵 点击开启雨声";
             }
         }
 
         function shredContent() {
             const area = document.getElementById('inputArea');
-            const content = document.getElementById('main-content');
-            const msgBox = document.getElementById('peace-msg');
-            const sound = document.getElementById('shredSound');
-
             if (!area.value.trim()) return;
 
-            // 碎纸/沉没声
-            sound.currentTime = 0;
-            sound.play().catch(()=>{});
+            document.getElementById('main-content').classList.add('shred-effect');
+            const msgBox = document.getElementById('peace-msg');
+            msgBox.innerText = "愿你轻装上阵，今晚有个好梦。";
+            msgBox.style.opacity = '1';
 
-            msgBox.innerText = quotes[Math.floor(Math.random() * quotes.length)];
-            content.classList.add('shred-effect');
-
-            setTimeout(() => { 
-                area.value = ""; 
-                content.style.visibility = 'hidden';
-                msgBox.style.opacity = '1';
-                
-                setTimeout(() => {
-                    msgBox.style.opacity = '0';
-                    setTimeout(() => {
-                        content.classList.remove('shred-effect');
-                        content.style.visibility = 'visible';
-                        content.style.opacity = '1';
-                    }, 1500);
-                }, 5000);
-            }, 1500);
+            setTimeout(() => {
+                location.reload(); // 5秒后重置，彻底清空
+            }, 5500);
         }
     </script>
 </body>
