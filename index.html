@@ -2,123 +2,155 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>无痕树洞 - 彻底粉碎</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渡口 - 留下你的负重</title>
     <style>
-        /* 这里是精装修（CSS）：让页面变好看 */
         body {
-            background-color: #1a1a1a; /* 深色背景，缓解压力 */
-            color: #ffffff;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: rgba(255, 255, 255, 0.85);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            font-family: "Microsoft YaHei", sans-serif;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            overflow: hidden;
         }
-        #shredder-box {
-            width: 80%;
-            max-width: 600px;
-            text-align: center;
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        textarea {
-            width: 100%;
-            height: 200px;
-            background: transparent;
-            border: 1px solid #444;
-            color: #eee;
-            padding: 20px;
-            font-size: 18px;
-            border-radius: 10px;
-            outline: none;
-            transition: all 0.5s;
-        }
-        button {
-            margin-top: 30px;
-            padding: 15px 40px;
-            background-color: #ff4d4d;
-            border: none;
-            color: white;
-            font-size: 20px;
-            border-radius: 50px;
+
+        #music-control {
+            position: fixed;
+            top: 25px;
+            right: 25px;
             cursor: pointer;
-            transition: 0.3s;
+            z-index: 100;
+            opacity: 0.6;
+            transition: all 0.3s;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 18px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            user-select: none;
         }
-        button:hover {
-            background-color: #ff1a1a;
-            transform: scale(1.05);
+
+        #music-control:hover { opacity: 1; background: rgba(255,255,255,0.15); border-color: #fff; }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 650px;
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        h1 { font-weight: 300; letter-spacing: 10px; margin-bottom: 8px; }
+        p.subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-bottom: 45px; letter-spacing: 3px; }
+
+        textarea {
+            width: 100%; height: 280px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px; padding: 35px;
+            color: #fff; font-size: 1.05rem; line-height: 2;
+            outline: none; resize: none; box-sizing: border-box;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.3);
+        }
+
+        button {
+            margin-top: 50px; padding: 14px 70px;
+            background: transparent; border: 1px solid rgba(255,255,255,0.3);
+            color: #fff; font-size: 15px; border-radius: 35px;
+            cursor: pointer; transition: all 0.5s; letter-spacing: 5px;
+        }
+
+        button:hover { background: rgba(255,255,255,0.1); border-color: #fff; transform: scale(1.05); }
+
+        .shred-effect { transform: scale(0.8) translateY(80px); filter: blur(40px); opacity: 0; pointer-events: none; }
+
+        #peace-msg {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            opacity: 0; transition: opacity 2.5s ease;
+            text-align: center; font-style: italic; font-size: 1.15rem; color: rgba(255, 255, 255, 0.7);
         }
     </style>
 </head>
 <body>
 
-    <div id="shredder-box">
-        <h1>把烦恼写在下面...</h1>
-        <textarea id="inputArea" placeholder="在这里写下任何你想发泄的话，没人能看到..."></textarea>
+    <div id="music-control" onclick="toggleMusic()">🎵 点击开启雨声</div>
+
+    <div class="container" id="main-content">
+        <h1>渡口</h1>
+        <p class="subtitle">让那些带不走的，留在此地</p>
+        <textarea id="inputArea" placeholder="写下你的心事..."></textarea>
         <br>
-        <button onclick="shredContent()">彻底粉碎</button>
+        <button onclick="shredContent()">彻底交付</button>
     </div>
 
+    <div id="peace-msg"></div>
+
+    <audio id="bgMusic" loop preload="auto">
+        <source src="https://www.soundjay.com/nature/rain-01.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="shredSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/255/255-preview.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
-async function shredContent() {
-    const area = document.getElementById('inputArea');
-    const box = document.getElementById('shredder-box');
-
-    if (!area.value.trim()) {
-        alert("请先写下你的烦恼...");
-        return;
-    }
-
-    // 1. 将文本框内容转为图片
-    const canvas = await html2canvas(area, { backgroundColor: null });
-    const ctx = canvas.getContext('2d');
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // 2. 隐藏原文本框
-    area.style.visibility = 'hidden';
-
-    // 3. 创建粒子效果容器
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.left = area.getBoundingClientRect().left + 'px';
-    container.style.top = area.getBoundingClientRect().top + 'px';
-    document.body.appendChild(container);
-
-    // 4. 抽取像素点生成粒子（为了性能，每隔4个像素抽一个）
-    for (let i = 0; i < data.data.length; i += 16) {
-        const x = (i / 4) % canvas.width;
-        const y = Math.floor((i / 4) / canvas.width);
+        const quotes = ["万物皆有裂痕，那是光照进来的地方。", "这一刻，风替你带走了它们。", "你已经做得很好了，接下来的路请轻装上阵。", "世界偶尔薄情，但我们要对自己温柔。"];
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('music-control');
         
-        if (data.data[i + 3] > 0) { // 如果这个点不是透明的
-            const dot = document.createElement('div');
-            dot.style.cssText = `
-                position: absolute;
-                width: 2px;
-                height: 2px;
-                background: rgba(${data.data[i]},${data.data[i+1]},${data.data[i+2]},${data.data[i+3]});
-                left: ${x}px;
-                top: ${y}px;
-                transition: all ${1 + Math.random() * 2}s ease-out;
-            `;
-            container.appendChild(dot);
-
-            // 5. 触发动画：让粒子随机飞散
-            setTimeout(() => {
-                dot.style.transform = `translate(${(Math.random() - 0.5) * 500}px, ${500 + Math.random() * 500}px) rotate(${Math.random() * 720}deg)`;
-                dot.style.opacity = '0';
-            }, 50);
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                // 直接播放，移除 alert
+                bgMusic.play().then(() => {
+                    bgMusic.volume = 0.3;
+                    musicBtn.innerText = "🎵 雨声播放中";
+                }).catch(err => {
+                    console.log("火狐仍拦截播放:", err);
+                });
+            } else {
+                bgMusic.pause();
+                musicBtn.innerText = "🎵 点击开启雨声";
+            }
         }
-    }
 
-    // 6. 清理现场
-    setTimeout(() => {
-        area.value = "";
-        area.style.visibility = 'visible';
-        container.remove();
-        console.log("彻底清空了。");
-    }, 3000);
-}
+        function shredContent() {
+            const area = document.getElementById('inputArea');
+            const content = document.getElementById('main-content');
+            const msgBox = document.getElementById('peace-msg');
+            const sound = document.getElementById('shredSound');
+
+            if (!area.value.trim()) return;
+
+            sound.currentTime = 0;
+            sound.play().catch(()=>{});
+
+            msgBox.innerText = quotes[Math.floor(Math.random() * quotes.length)];
+            content.classList.add('shred-effect');
+
+            setTimeout(() => { area.value = ""; }, 600);
+            setTimeout(() => {
+                content.style.visibility = 'hidden';
+                msgBox.style.opacity = '1';
+                setTimeout(() => {
+                    msgBox.style.opacity = '0';
+                    setTimeout(() => {
+                        content.classList.remove('shred-effect');
+                        content.style.visibility = 'visible';
+                        content.style.opacity = '1';
+                    }, 1500);
+                }, 5000);
+            }, 1200);
+        }
     </script>
 </body>
 </html>
