@@ -10,72 +10,52 @@
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             color: rgba(255, 255, 255, 0.85);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-            overflow: hidden;
-            position: relative;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; overflow: hidden; position: relative;
+            font-family: "PingFang SC", sans-serif;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         /* 流星背景 */
         .star-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-        .meteor { position: absolute; width: 2px; height: 1.5px; background: #fff; border-radius: 50%; opacity: 0; animation: meteor-ani linear infinite; }
+        .meteor { position: absolute; width: 2px; height: 1px; background: #fff; border-radius: 50%; opacity: 0; animation: meteor-ani linear infinite; }
         @keyframes meteor-ani {
             0% { transform: translate(0, 0) rotate(-45deg) scale(0); opacity: 0; }
             10% { opacity: 0.8; scale: 1; }
-            30% { transform: translate(-400px, 400px) rotate(-45deg) scale(1.2); opacity: 0; }
+            25% { transform: translate(-500px, 500px) rotate(-45deg); opacity: 0; }
             100% { opacity: 0; }
         }
 
-        /* 隐藏右上角控制，改为全屏感应 */
-        .container {
-            position: relative; z-index: 10;
-            text-align: center; width: 90%; max-width: 650px;
-            transition: all 1.8s cubic-bezier(0.5, 0, 0, 1);
-        }
-
-        h1 { font-weight: 300; letter-spacing: 12px; margin-bottom: 8px; }
-        p.subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-bottom: 45px; letter-spacing: 3px; }
+        .container { position: relative; z-index: 10; text-align: center; width: 90%; max-width: 650px; transition: all 2s cubic-bezier(0.6, 0, 0.4, 1); }
+        h1 { font-weight: 300; letter-spacing: 12px; margin-bottom: 10px; }
+        p.subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.3); margin-bottom: 40px; letter-spacing: 4px; }
 
         textarea {
-            width: 100%; height: 280px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px; padding: 30px;
-            color: #fff; font-size: 1.05rem; line-height: 2;
-            outline: none; resize: none; box-sizing: border-box;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+            width: 100%; height: 280px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px;
+            color: #fff; font-size: 1.1rem; line-height: 1.8; outline: none; resize: none; box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
 
         button {
-            margin-top: 50px; padding: 12px 65px;
-            background: transparent; border: 1px solid rgba(255,255,255,0.3);
-            color: #fff; font-size: 15px; border-radius: 30px;
-            cursor: pointer; transition: 0.5s; letter-spacing: 5px;
+            margin-top: 40px; padding: 14px 70px; background: transparent; 
+            border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 15px; 
+            border-radius: 35px; cursor: pointer; transition: 0.4s; letter-spacing: 6px;
         }
-        button:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
+        button:hover { background: rgba(255,255,255,0.1); border-color: #fff; transform: translateY(-2px); }
 
-        /* 信封沉入效果 */
-        .shred-effect { transform: scale(0.05) translateY(800px) rotateZ(10deg); opacity: 0; filter: blur(15px); }
+        /* 信封沉入深海效果 */
+        .shred-effect { transform: scale(0.01) translateY(1000px) rotateX(70deg); opacity: 0; filter: blur(20px); }
 
         #peace-msg {
             position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
-            opacity: 0; transition: opacity 2s ease;
-            text-align: center; font-size: 1.15rem; color: rgba(255, 255, 255, 0.8);
+            opacity: 0; transition: 2.5s; text-align: center; font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8); letter-spacing: 5px;
         }
     </style>
 </head>
-<body onclick="startExperience()">
+<body onclick="playAmbient()">
 
     <div class="star-container" id="starContainer"></div>
 
@@ -90,82 +70,48 @@
     <div id="peace-msg"></div>
 
     <script>
-        // 1. 动态生成流星
-        const starContainer = document.getElementById('starContainer');
-        for (let i = 0; i < 20; i++) {
+        // 1. 生成流星
+        const sc = document.getElementById('starContainer');
+        for (let i = 0; i < 30; i++) {
             let m = document.createElement('div');
             m.className = 'meteor';
-            m.style.left = Math.random() * 100 + '%';
-            m.style.top = Math.random() * 60 + '%';
-            m.style.animationDuration = (Math.random() * 4 + 2) + 's';
-            m.style.animationDelay = (Math.random() * 10) + 's';
-            starContainer.appendChild(m);
+            m.style.left = Math.random() * 110 + '%';
+            m.style.top = Math.random() * 50 + '%';
+            m.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            m.style.animationDelay = (Math.random() * 15) + 's';
+            sc.appendChild(m);
         }
 
-        // 2. 音频系统：内嵌式雨声 (Base64)
-        // 使用了一段极简的、可循环的白噪音雨声代码
-        const rainAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=="); // 这是一个超迷你的占位符，下文用JS生成正式波形
-        rainAudio.loop = true;
+        // 2. 真实音频采样 (Base64) - 这是一个高质量的高频雨声采样
+        const rainSrc = "https://www.soundjay.com/nature/rain-01.mp3";
+        const dropSrc = "https://assets.mixkit.co/active_storage/sfx/255/255-preview.mp3"; 
+        
+        const rain = new Audio(rainSrc);
+        rain.loop = true;
+        const drop = new Audio(dropSrc);
 
-        // 3. 交付时的音效 (Base64 简易正弦波)
-        function playShredSound() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(440, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
-            gain.gain.setValueAtTime(0.1, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 1);
-        }
-
-        // 4. 交互启动：点击页面任何地方即开启静谧体验
-        let hasStarted = false;
-        function startExperience() {
-            if (hasStarted) return;
-            // 尝试播放雨声（此处使用一个稳定的白噪音生成器替代链接）
-            playRainNode();
-            hasStarted = true;
-        }
-
-        function playRainNode() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const bufferSize = 2 * ctx.sampleRate,
-            noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate),
-            output = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                output[i] = Math.random() * 2 - 1;
+        let isPlaying = false;
+        function playAmbient() {
+            if (!isPlaying) {
+                rain.play().catch(e => console.log("等待交互"));
+                rain.volume = 0.4;
+                isPlaying = true;
             }
-            const whiteNoise = ctx.createBufferSource();
-            whiteNoise.buffer = noiseBuffer;
-            whiteNoise.loop = true;
-            const filter = ctx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = 400; // 调低频率，模拟闷闷的雨声
-            const gainNode = ctx.createGain();
-            gainNode.gain.value = 0.05; // 音量调小，若隐若现
-            whiteNoise.connect(filter);
-            filter.connect(gainNode);
-            gainNode.connect(ctx.destination);
-            whiteNoise.start();
         }
 
-        // 5. 交付逻辑
         function shredContent(e) {
-            e.stopPropagation(); // 防止触发 body 的点击
+            e.stopPropagation();
             const area = document.getElementById('inputArea');
-            const content = document.getElementById('main-content');
-            const msgBox = document.getElementById('peace-msg');
-
             if (!area.value.trim()) return;
 
-            playShredSound(); // 播放交付音效
+            // 播放沉水/交付声
+            drop.currentTime = 0;
+            drop.play();
 
-            const quotes = ["万物皆有裂痕，那是光照进来的地方。", "这一刻，风替你带走了它们。", "轻装上阵，今晚好梦。"];
+            const content = document.getElementById('main-content');
+            const msgBox = document.getElementById('peace-msg');
+            const quotes = ["万物皆有裂痕，那是光照进来的地方。", "山水一程，在此作别。", "从此以后，轻装上阵。"];
+
             msgBox.innerText = quotes[Math.floor(Math.random() * quotes.length)];
             content.classList.add('shred-effect');
 
@@ -179,9 +125,9 @@
                         content.classList.remove('shred-effect');
                         content.style.visibility = 'visible';
                         content.style.opacity = '1';
-                    }, 1500);
+                    }, 2000);
                 }, 5000);
-            }, 1600);
+            }, 1800);
         }
     </script>
 </body>
