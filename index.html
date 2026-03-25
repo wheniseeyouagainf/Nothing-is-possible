@@ -18,6 +18,7 @@
             margin: 0;
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             overflow: hidden;
+            position: relative;
         }
 
         @keyframes gradientBG {
@@ -26,29 +27,40 @@
             100% { background-position: 0% 50%; }
         }
 
-        #music-control {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            cursor: pointer;
-            z-index: 100;
-            opacity: 0.6;
-            transition: all 0.3s;
-            font-size: 13px;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 18px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.05);
-            user-select: none;
+        /* 流星样式 */
+        .star-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+        .meteor {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: meteor-ani linear infinite;
+        }
+        @keyframes meteor-ani {
+            0% { transform: translate(0, 0) rotate(-45deg) scale(0); opacity: 0; }
+            10% { opacity: 1; scale: 1; }
+            20% { transform: translate(-300px, 300px) rotate(-45deg) scale(1); opacity: 0; }
+            100% { opacity: 0; }
         }
 
-        #music-control:hover { opacity: 1; background: rgba(255,255,255,0.15); border-color: #fff; }
+        #music-control {
+            position: fixed; top: 25px; right: 25px;
+            cursor: pointer; z-index: 100;
+            opacity: 0.6; transition: 0.3s;
+            font-size: 13px; border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 18px; border-radius: 20px;
+            background: rgba(0,0,0,0.2); user-select: none;
+        }
 
         .container {
-            text-align: center;
-            width: 90%;
-            max-width: 650px;
-            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; z-index: 10;
+            text-align: center; width: 90%; max-width: 650px;
+            transition: all 1.8s cubic-bezier(0.5, 0, 0, 1);
         }
 
         h1 { font-weight: 300; letter-spacing: 10px; margin-bottom: 8px; }
@@ -56,70 +68,87 @@
 
         textarea {
             width: 100%; height: 280px;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px; padding: 35px;
+            border-radius: 15px; padding: 30px;
             color: #fff; font-size: 1.05rem; line-height: 2;
             outline: none; resize: none; box-sizing: border-box;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         button {
-            margin-top: 50px; padding: 14px 70px;
+            margin-top: 50px; padding: 12px 60px;
             background: transparent; border: 1px solid rgba(255,255,255,0.3);
-            color: #fff; font-size: 15px; border-radius: 35px;
-            cursor: pointer; transition: all 0.5s; letter-spacing: 5px;
+            color: #fff; font-size: 14px; border-radius: 30px;
+            cursor: pointer; transition: 0.5s; letter-spacing: 4px;
+        }
+        button:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+        /* 信封沉入效果 */
+        .shred-effect {
+            transform: scale(0.1) translateY(600px) rotateX(45deg);
+            opacity: 0;
+            filter: blur(10px);
         }
 
-        button:hover { background: rgba(255,255,255,0.1); border-color: #fff; transform: scale(1.05); }
-
-        .shred-effect { transform: scale(0.8) translateY(80px); filter: blur(40px); opacity: 0; pointer-events: none; }
-
         #peace-msg {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            opacity: 0; transition: opacity 2.5s ease;
-            text-align: center; font-style: italic; font-size: 1.15rem; color: rgba(255, 255, 255, 0.7);
+            position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            opacity: 0; transition: opacity 2s ease;
+            text-align: center; font-style: italic; font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.75); letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
 
-    <div id="music-control" onclick="toggleMusic()">🎵 点击开启雨声</div>
+    <div class="star-container" id="starContainer"></div>
+    <div id="music-control" onclick="toggleMusic()">🎵 开启环境音</div>
 
     <div class="container" id="main-content">
         <h1>渡口</h1>
-        <p class="subtitle">让那些带不走的，留在此地</p>
-        <textarea id="inputArea" placeholder="写下你的心事..."></textarea>
+        <p class="subtitle">让带不走的，留在此地</p>
+        <textarea id="inputArea" placeholder="写下你的心事，让流星带走它..."></textarea>
         <br>
         <button onclick="shredContent()">彻底交付</button>
     </div>
 
     <div id="peace-msg"></div>
 
-    <audio id="bgMusic" loop preload="auto">
-        <source src="https://www.soundjay.com/nature/rain-01.mp3" type="audio/mpeg">
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundjay.com/nature/sounds/rain-01.mp3" type="audio/mpeg">
     </audio>
-    <audio id="shredSound" preload="auto">
+    <audio id="shredSound">
         <source src="https://assets.mixkit.co/active_storage/sfx/255/255-preview.mp3" type="audio/mpeg">
     </audio>
 
     <script>
+        // 生成流星
+        const starContainer = document.getElementById('starContainer');
+        for (let i = 0; i < 20; i++) {
+            let meteor = document.createElement('div');
+            meteor.className = 'meteor';
+            meteor.style.left = Math.random() * 100 + '%';
+            meteor.style.top = Math.random() * 50 + '%';
+            meteor.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            meteor.style.animationDelay = (Math.random() * 10) + 's';
+            starContainer.appendChild(meteor);
+        }
+
         const quotes = ["万物皆有裂痕，那是光照进来的地方。", "这一刻，风替你带走了它们。", "你已经做得很好了，接下来的路请轻装上阵。", "世界偶尔薄情，但我们要对自己温柔。"];
         const bgMusic = document.getElementById('bgMusic');
         const musicBtn = document.getElementById('music-control');
-        
+
         function toggleMusic() {
             if (bgMusic.paused) {
-                // 直接播放，移除 alert
                 bgMusic.play().then(() => {
                     bgMusic.volume = 0.3;
-                    musicBtn.innerText = "🎵 雨声播放中";
-                }).catch(err => {
-                    console.log("火狐仍拦截播放:", err);
+                    musicBtn.innerText = "🎵 环境音已开启";
+                }).catch(e => {
+                    alert("请先点击页面任意位置，再开启声音。");
                 });
             } else {
                 bgMusic.pause();
-                musicBtn.innerText = "🎵 点击开启雨声";
+                musicBtn.innerText = "🎵 环境音已关闭";
             }
         }
 
@@ -131,16 +160,18 @@
 
             if (!area.value.trim()) return;
 
+            // 碎纸/沉没声
             sound.currentTime = 0;
             sound.play().catch(()=>{});
 
             msgBox.innerText = quotes[Math.floor(Math.random() * quotes.length)];
             content.classList.add('shred-effect');
 
-            setTimeout(() => { area.value = ""; }, 600);
-            setTimeout(() => {
+            setTimeout(() => { 
+                area.value = ""; 
                 content.style.visibility = 'hidden';
                 msgBox.style.opacity = '1';
+                
                 setTimeout(() => {
                     msgBox.style.opacity = '0';
                     setTimeout(() => {
@@ -149,7 +180,7 @@
                         content.style.opacity = '1';
                     }, 1500);
                 }, 5000);
-            }, 1200);
+            }, 1500);
         }
     </script>
 </body>
