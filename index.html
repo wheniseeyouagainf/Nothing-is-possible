@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>渡口 - 留下你的负重</title>
     <style>
-        /* 保留你喜欢的星空和渐变样式 */
         body {
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             background-size: 400% 400%;
@@ -19,108 +18,174 @@
             margin: 0;
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             overflow: hidden;
+            position: relative;
         }
 
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        .star-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .meteor { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; opacity: 0; animation: meteor-ani linear infinite; }
-        @keyframes meteor-ani { 0% { transform: translate(0, 0) rotate(-45deg) scale(0); opacity: 0; } 10% { opacity: 1; } 20% { transform: translate(-300px, 300px) rotate(-45deg); opacity: 0; } }
+        /* 流星 */
+        .star-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+        .meteor {
+            position: absolute;
+            width: 2px; height: 1.5px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: meteor-ani linear infinite;
+        }
+        @keyframes meteor-ani {
+            0% { transform: translate(0, 0) rotate(-45deg) scale(0); opacity: 0; }
+            10% { opacity: 0.8; scale: 1; }
+            30% { transform: translate(-400px, 400px) rotate(-45deg) scale(1.2); opacity: 0; }
+            100% { opacity: 0; }
+        }
 
         #music-control {
-            position: fixed; top: 25px; right: 25px; cursor: pointer; z-index: 100;
-            border: 1px solid rgba(255,255,255,0.3); padding: 8px 18px; border-radius: 20px;
+            position: fixed; top: 25px; right: 25px;
+            cursor: pointer; z-index: 100;
+            opacity: 0.7; transition: 0.3s;
+            font-size: 13px; border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 18px; border-radius: 25px;
             background: rgba(0,0,0,0.3); user-select: none;
         }
 
-        .container { text-align: center; width: 90%; max-width: 650px; transition: all 1.8s ease; z-index: 10; }
-        textarea { width: 100%; height: 280px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 30px; color: #fff; font-size: 1rem; outline: none; resize: none; }
-        button { margin-top: 50px; padding: 12px 60px; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 30px; cursor: pointer; }
-        
-        .shred-effect { transform: scale(0.1) translateY(600px); opacity: 0; }
-        #peace-msg { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); opacity: 0; transition: 2s; text-align: center; color: #fff; }
+        .container {
+            position: relative; z-index: 10;
+            text-align: center; width: 90%; max-width: 650px;
+            transition: all 1.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+
+        h1 { font-weight: 300; letter-spacing: 12px; margin-bottom: 8px; }
+        p.subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-bottom: 45px; letter-spacing: 3px; }
+
+        textarea {
+            width: 100%; height: 280px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px; padding: 30px;
+            color: #fff; font-size: 1.05rem; line-height: 2;
+            outline: none; resize: none; box-sizing: border-box;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+
+        button.deliver-btn {
+            margin-top: 50px; padding: 12px 65px;
+            background: transparent; border: 1px solid rgba(255,255,255,0.3);
+            color: #fff; font-size: 15px; border-radius: 30px;
+            cursor: pointer; transition: 0.5s; letter-spacing: 5px;
+        }
+        button.deliver-btn:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
+
+        .shred-effect {
+            transform: scale(0.05) translateY(800px) rotateZ(10deg);
+            opacity: 0;
+            filter: blur(15px);
+        }
+
+        #peace-msg {
+            position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            opacity: 0; transition: opacity 2s ease;
+            text-align: center; font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.8); letter-spacing: 4px; line-height: 2;
+        }
     </style>
 </head>
-<body onclick="unlockAudio()">
+<body onclick="wakeAudio()">
 
     <div class="star-container" id="starContainer"></div>
-    <div id="music-control" onclick="toggleMusic()">🎵 声音：加载中...</div>
+    <div id="music-control" onclick="toggleMusic(event)">🎵 开启声音</div>
 
     <div class="container" id="main-content">
         <h1>渡口</h1>
-        <p style="color:rgba(255,255,255,0.4); letter-spacing: 3px;">让带不走的，留在此地</p>
-        <textarea id="inputArea" placeholder="写下你的心事..."></textarea>
+        <p class="subtitle">让带不走的，留在此地</p>
+        <textarea id="inputArea" placeholder="写下你的心事，让流星带走它..."></textarea>
         <br>
-        <button onclick="shredContent()">彻底交付</button>
+        <button class="deliver-btn" onclick="shredContent()">彻底交付</button>
     </div>
 
     <div id="peace-msg"></div>
 
     <script>
-        // 流星生成逻辑保持不变
+        // 生成流星
         const starContainer = document.getElementById('starContainer');
-        for (let i = 0; i < 15; i++) {
-            let m = document.createElement('div');
-            m.className = 'meteor';
-            m.style.left = Math.random() * 100 + '%';
-            m.style.top = Math.random() * 50 + '%';
-            m.style.animationDuration = (Math.random() * 3 + 2) + 's';
-            m.style.animationDelay = (Math.random() * 5) + 's';
-            starContainer.appendChild(m);
+        for (let i = 0; i < 25; i++) {
+            let meteor = document.createElement('div');
+            meteor.className = 'meteor';
+            meteor.style.left = Math.random() * 100 + '%';
+            meteor.style.top = Math.random() * 60 + '%';
+            meteor.style.animationDuration = (Math.random() * 4 + 2) + 's';
+            meteor.style.animationDelay = (Math.random() * 12) + 's';
+            starContainer.appendChild(meteor);
         }
 
-        // --- 核心音频逻辑修复 ---
+        // --- 纯代码级音频逻辑 ---
         const bgMusic = new Audio();
         bgMusic.loop = true;
-        // 关键：使用能稳定访问的官方测试源
+        // 这里换用了一个来自稳定 CDN 且极小的 OGG 雨声源
         bgMusic.src = "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg";
-
-        let audioContext;
+        
+        let audioWaked = false;
         const musicBtn = document.getElementById('music-control');
 
-        // 1. 强制解锁 AudioContext (针对火狐)
-        function unlockAudio() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
+        // 火狐点击唤醒逻辑
+        function wakeAudio() {
+            if (!audioWaked) {
+                bgMusic.load(); // 预加载
+                audioWaked = true;
             }
         }
 
-        // 2. 状态监测
-        bgMusic.oncanplaythrough = () => {
-            musicBtn.innerText = "🎵 点击开启雨声";
-        };
-
-        async function toggleMusic() {
-            unlockAudio();
+        async function toggleMusic(e) {
+            e.stopPropagation(); // 阻止冒泡
             if (bgMusic.paused) {
                 try {
                     await bgMusic.play();
-                    bgMusic.volume = 0.4;
+                    bgMusic.volume = 0.35;
                     musicBtn.innerText = "🎵 雨声播放中";
-                } catch (e) {
-                    console.log("播放失败", e);
+                } catch (err) {
+                    console.log("Firefox still blocking: ", err);
+                    // 如果还不行，强制用户点击
+                    musicBtn.innerText = "⚠️ 请先点页面任何位置";
                 }
             } else {
                 bgMusic.pause();
-                musicBtn.innerText = "🎵 点击开启雨声";
+                musicBtn.innerText = "🎵 声音：已关闭";
             }
         }
 
         function shredContent() {
             const area = document.getElementById('inputArea');
+            const content = document.getElementById('main-content');
+            const msgBox = document.getElementById('peace-msg');
+
             if (!area.value.trim()) return;
 
-            document.getElementById('main-content').classList.add('shred-effect');
-            const msgBox = document.getElementById('peace-msg');
-            msgBox.innerText = "愿你轻装上阵，今晚有个好梦。";
-            msgBox.style.opacity = '1';
+            const quotes = ["万物皆有裂痕，那是光照进来的地方。", "这一刻，风替你带走了它们。", "生活会有阴雨，但星光总在后面。", "放下包袱，轻装前行。"];
+            
+            msgBox.innerText = quotes[Math.floor(Math.random() * quotes.length)];
+            content.classList.add('shred-effect');
 
-            setTimeout(() => {
-                location.reload(); // 5秒后重置，彻底清空
-            }, 5500);
+            setTimeout(() => { 
+                area.value = ""; 
+                content.style.visibility = 'hidden';
+                msgBox.style.opacity = '1';
+                
+                setTimeout(() => {
+                    msgBox.style.opacity = '0';
+                    setTimeout(() => {
+                        content.classList.remove('shred-effect');
+                        content.style.visibility = 'visible';
+                        content.style.opacity = '1';
+                    }, 1500);
+                }, 5500);
+            }, 1600);
         }
     </script>
 </body>
