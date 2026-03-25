@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>无痕树洞 - 彻底粉碎</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* 这里是精装修（CSS）：让页面变好看 */
+        body {
+            background-color: #1a1a1a; /* 深色背景，缓解压力 */
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        #shredder-box {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: transparent;
+            border: 1px solid #444;
+            color: #eee;
+            padding: 20px;
+            font-size: 18px;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.5s;
+        }
+        button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background-color: #ff4d4d;
+            border: none;
+            color: white;
+            font-size: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #ff1a1a;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="shredder-box">
+        <h1>把烦恼写在下面...</h1>
+        <textarea id="inputArea" placeholder="在这里写下任何你想发泄的话，没人能看到..."></textarea>
+        <br>
+        <button onclick="shredContent()">彻底粉碎</button>
+    </div>
+
+    <script>
+async function shredContent() {
+    const area = document.getElementById('inputArea');
+    const box = document.getElementById('shredder-box');
+
+    if (!area.value.trim()) {
+        alert("请先写下你的烦恼...");
+        return;
+    }
+
+    // 1. 将文本框内容转为图片
+    const canvas = await html2canvas(area, { backgroundColor: null });
+    const ctx = canvas.getContext('2d');
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // 2. 隐藏原文本框
+    area.style.visibility = 'hidden';
+
+    // 3. 创建粒子效果容器
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = area.getBoundingClientRect().left + 'px';
+    container.style.top = area.getBoundingClientRect().top + 'px';
+    document.body.appendChild(container);
+
+    // 4. 抽取像素点生成粒子（为了性能，每隔4个像素抽一个）
+    for (let i = 0; i < data.data.length; i += 16) {
+        const x = (i / 4) % canvas.width;
+        const y = Math.floor((i / 4) / canvas.width);
+        
+        if (data.data[i + 3] > 0) { // 如果这个点不是透明的
+            const dot = document.createElement('div');
+            dot.style.cssText = `
+                position: absolute;
+                width: 2px;
+                height: 2px;
+                background: rgba(${data.data[i]},${data.data[i+1]},${data.data[i+2]},${data.data[i+3]});
+                left: ${x}px;
+                top: ${y}px;
+                transition: all ${1 + Math.random() * 2}s ease-out;
+            `;
+            container.appendChild(dot);
+
+            // 5. 触发动画：让粒子随机飞散
+            setTimeout(() => {
+                dot.style.transform = `translate(${(Math.random() - 0.5) * 500}px, ${500 + Math.random() * 500}px) rotate(${Math.random() * 720}deg)`;
+                dot.style.opacity = '0';
+            }, 50);
+        }
+    }
+
+    // 6. 清理现场
+    setTimeout(() => {
+        area.value = "";
+        area.style.visibility = 'visible';
+        container.remove();
+        console.log("彻底清空了。");
+    }, 3000);
+}
+    </script>
+</body>
+</html>
